@@ -87,7 +87,7 @@ export function TeamCard({ data }: { data: TeamData }) {
       {!liveMatch && nextMatch && (
         <div className="rounded-xl border border-pitch-line bg-pitch p-4">
           <p className="mb-1 text-[11px] font-medium uppercase tracking-wide text-whistle">
-            Next match &middot; {formatKickoff(nextMatch.utcDate)}
+            Next match &middot; <KickoffLabel utcDate={nextMatch.utcDate} />
           </p>
           <MatchLine match={nextMatch} config={config} />
         </div>
@@ -109,6 +109,16 @@ export function TeamCard({ data }: { data: TeamData }) {
         </div>
       )}
     </div>
+  )
+}
+
+function KickoffLabel({ utcDate }: { utcDate: string }) {
+  const { primary, secondary } = formatKickoff(utcDate)
+  return (
+    <>
+      <span className="font-semibold text-chalk">{primary}</span>
+      {secondary && ` (${secondary})`}
+    </>
   )
 }
 

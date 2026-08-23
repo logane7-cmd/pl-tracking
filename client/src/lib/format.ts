@@ -1,15 +1,27 @@
 import type { ApiMatch } from '../types'
 import { matchesTeam, type TeamConfig as Config } from '../config/teams'
 
-export function formatKickoff(utcDate: string): string {
+export interface KickoffTime {
+  primary: string
+  secondary: string | null
+}
+
+const CENTRAL_TIME_ZONE = 'America/Chicago'
+
+export function formatKickoff(utcDate: string): KickoffTime {
   const d = new Date(utcDate)
-  return d.toLocaleString(undefined, {
+  const opts: Intl.DateTimeFormatOptions = {
     weekday: 'short',
     month: 'short',
     day: 'numeric',
     hour: 'numeric',
     minute: '2-digit',
-  })
+    timeZoneName: 'short',
+  }
+  const primary = d.toLocaleString(undefined, { ...opts, timeZone: CENTRAL_TIME_ZONE })
+  const localZone = Intl.DateTimeFormat().resolvedOptions().timeZone
+  const secondary = localZone === CENTRAL_TIME_ZONE ? null : d.toLocaleString(undefined, opts)
+  return { primary, secondary }
 }
 
 export function opponentOf(config: Config, match: ApiMatch) {
