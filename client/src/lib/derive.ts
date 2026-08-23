@@ -33,5 +33,10 @@ export function deriveTeamData(
       teamMatches.find((m) => UPCOMING_STATUSES.has(m.status)) ?? null
 
     return { config, standing, liveMatch, lastMatch, nextMatch }
+  }).sort((a, b) => {
+    if (a.standing === null && b.standing === null) return 0
+    if (a.standing === null) return 1
+    if (b.standing === null) return -1
+    return a.standing.position - b.standing.position
   })
 }
