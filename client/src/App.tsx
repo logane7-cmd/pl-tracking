@@ -1,0 +1,65 @@
+import { useEffect, useState, useCallback } from 'react'
+import { TEAMS } from './config/teams'
+import { fetchMatches, fetchStandings } from './lib/api'
+import { deriveTeamData, type TeamData } from './lib/derive'
+import { TeamCard } from './components/TeamCard'
+
+const REFRESH_MS = 60_000
+
+export default function App() {
+  const [teamData, setTeamData] = useState<TeamData[] | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
+
+  const load = useCallback(async () => {
+    try {
+      const [standingsRes, matchesRes] = await Promise.all([fetchStandings(), fetchMatches()])
+      const table = standingsRes.standings.find((s) => s.type === 'TOTAL')?.table ?? []
+      setTeamData(deriveTeamData(TEAMS, table, matchesRes.matches))
+      setLastUpdated(new Date())
+      setError(null)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load data')
+    }
+  }, [])
+
+  useEffect(() => {
+    load()
+    const id = setInterval(load, REFRESH_MS)
+    return () => clearInterval(id)
+  }, [load])
+
+  return (
+    <div className="min-h-screen bg-neutral-950 px-4 py-10 text-neutral-100">
+      <div className="mx-auto max-w-6xl">
+        <header className="mb-8 flex flex-col items-center gap-2 text-center">
+          <h1 className="text-3xl font-bold sm:text-4xl">Premier League Tracker</h1>
+          <p className="text-neutral-400">Four rivals, four tables of trash talk.</p>
+          {lastUpdated && (
+            <p className="text-xs text-neutral-600">
+              Updated {lastUpdated.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
+            </p>
+          )}
+        </header>
+
+        {error && (
+          <p className="mb-6 rounded-lg border border-rose-500/30 bg-rose-500/10 p-4 text-center text-sm text-rose-300">
+            {error}
+          </p>
+        )}
+
+        {!teamData && !error && (
+          <p className="text-center text-neutral-500">Loading standings...</p>
+        )}
+
+        {teamData && (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">
+            {teamData.map((data) => (
+              <TeamCard key={data.config.owner} data={data} />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}

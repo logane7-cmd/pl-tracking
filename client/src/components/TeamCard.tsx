@@ -1,0 +1,145 @@
+import type { TeamData } from '../lib/derive'
+import { formatKickoff, opponentOf, resultFor, scoreLine } from '../lib/format'
+
+const RESULT_STYLES: Record<'W' | 'D' | 'L', string> = {
+  W: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
+  D: 'bg-slate-500/15 text-slate-300 border-slate-500/30',
+  L: 'bg-rose-500/15 text-rose-400 border-rose-500/30',
+}
+
+function FormBadges({ form }: { form: string | null }) {
+  if (!form) return <p className="text-sm text-neutral-500">No results yet this season</p>
+  const results = form
+    .split(',')
+    .map((s) => s.trim().toUpperCase())
+    .filter((s): s is 'W' | 'D' | 'L' => s === 'W' || s === 'D' || s === 'L')
+  return (
+    <div className="flex gap-1.5">
+      {results.map((r, i) => (
+        <span
+          key={i}
+          className={`flex h-6 w-6 items-center justify-center rounded-full border text-xs font-semibold ${RESULT_STYLES[r]}`}
+        >
+          {r}
+        </span>
+      ))}
+    </div>
+  )
+}
+
+export function TeamCard({ data }: { data: TeamData }) {
+  const { config, standing, liveMatch, lastMatch, nextMatch } = data
+
+  return (
+    <div
+      className="flex flex-col gap-5 rounded-2xl border border-neutral-800 bg-neutral-900/60 p-6 shadow-lg"
+      style={{ borderTopColor: config.color, borderTopWidth: 4 }}
+    >
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          {standing && (
+            <img src={standing.team.crest} alt="" className="h-12 w-12 object-contain" />
+          )}
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">
+              {config.owner}'s team
+            </p>
+            <h2 className="text-lg font-semibold text-neutral-50">{config.displayName}</h2>
+          </div>
+        </div>
+        {standing && (
+          <div className="text-right">
+            <p className="text-3xl font-bold leading-none text-neutral-50">
+              {standing.position}
+              <span className="text-sm font-medium text-neutral-500">
+                {ordinalSuffix(standing.position)}
+              </span>
+            </p>
+            <p className="text-xs text-neutral-500">{standing.points} pts</p>
+          </div>
+        )}
+      </div>
+
+      {standing && (
+        <div className="grid grid-cols-4 gap-2 text-center text-sm">
+          <Stat label="P" value={standing.playedGames} />
+          <Stat label="W" value={standing.won} />
+          <Stat label="D" value={standing.draw} />
+          <Stat label="L" value={standing.lost} />
+        </div>
+      )}
+
+      <div>
+        <p className="mb-2 text-xs font-medium uppercase tracking-wide text-neutral-500">Form</p>
+        <FormBadges form={standing?.form ?? null} />
+      </div>
+
+      {liveMatch && (
+        <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-4">
+          <p className="mb-1 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-amber-400">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-400" />
+            Live now
+          </p>
+          <MatchLine match={liveMatch} config={config} />
+        </div>
+      )}
+
+      {!liveMatch && nextMatch && (
+        <div className="rounded-xl border border-neutral-800 bg-neutral-950/50 p-4">
+          <p className="mb-1 text-xs font-medium uppercase tracking-wide text-neutral-500">
+            Next match &middot; {formatKickoff(nextMatch.utcDate)}
+          </p>
+          <MatchLine match={nextMatch} config={config} />
+        </div>
+      )}
+
+      {lastMatch && (
+        <div className="rounded-xl border border-neutral-800 p-4">
+          <p className="mb-1 flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-neutral-500">
+            Last result
+            {resultFor(config, lastMatch) && (
+              <span
+                className={`rounded border px-1.5 py-0.5 text-[10px] font-semibold ${RESULT_STYLES[resultFor(config, lastMatch)!]}`}
+              >
+                {resultFor(config, lastMatch)}
+              </span>
+            )}
+          </p>
+          <MatchLine match={lastMatch} config={config} />
+        </div>
+      )}
+    </div>
+  )
+}
+
+function MatchLine({ match, config }: { match: TeamData['nextMatch']; config: TeamData['config'] }) {
+  if (!match) return null
+  const { isHome, opponent } = opponentOf(config, match)
+  const hasScore = match.score.fullTime.home !== null
+  return (
+    <div className="flex items-center gap-2 text-sm text-neutral-200">
+      <span className="text-neutral-500">{isHome ? 'vs' : '@'}</span>
+      <img src={opponent.crest} alt="" className="h-5 w-5 object-contain" />
+      <span>{opponent.shortName || opponent.name}</span>
+      {hasScore && <span className="ml-auto font-semibold">{scoreLine(match)}</span>}
+    </div>
+  )
+}
+
+function Stat({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="rounded-lg bg-neutral-950/50 py-2">
+      <p className="text-base font-semibold text-neutral-100">{value}</p>
+      <p className="text-[10px] uppercase tracking-wide text-neutral-500">{label}</p>
+    </div>
+  )
+}
+
+function ordinalSuffix(n: number): string {
+  const j = n % 10
+  const k = n % 100
+  if (j === 1 && k !== 11) return 'st'
+  if (j === 2 && k !== 12) return 'nd'
+  if (j === 3 && k !== 13) return 'rd'
+  return 'th'
+}
