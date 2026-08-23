@@ -8,3 +8,8 @@ ALLOWED_ORIGIN = "https://logane7-cmd.github.io"
 
 # FOOTBALL_DATA_API_KEY is a secret, not a var — set it with:
 #   npx wrangler secret put FOOTBALL_DATA_API_KEY
+
+[[ratelimits]]
+name = "RATE_LIMITER"
+namespace_id = "1001"
+simple = { limit = 30, period = 60 }
