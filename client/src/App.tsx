@@ -1,19 +1,25 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { TEAMS } from './config/teams'
 import { fetchMatches, fetchStandings } from './lib/api'
 import { deriveTeamData, type TeamData } from './lib/derive'
+import { shouldPollNow } from './lib/polling'
 import { TeamCard } from './components/TeamCard'
 import { StandingsTable } from './components/StandingsTable'
 import { ThemeToggle } from './components/ThemeToggle'
-import type { StandingsRow } from './types'
+import type { ApiMatch, StandingsRow } from './types'
 
-const REFRESH_MS = 60_000
+// Local check tick, not a network call. Actual fetch cadence is decided by
+// shouldPollNow: 60s while a match is live, 15min idle, paused 23:00-08:00 UK
+// (see backlog/BL-0006.md).
+const TICK_MS = 60_000
 
 export default function App() {
   const [teamData, setTeamData] = useState<TeamData[] | null>(null)
   const [standingsTable, setStandingsTable] = useState<StandingsRow[] | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
+  const matchesRef = useRef<ApiMatch[] | null>(null)
+  const lastFetchAtRef = useRef<number>(0)
 
   const load = useCallback(async () => {
     try {
@@ -23,6 +29,8 @@ export default function App() {
       setStandingsTable(table)
       setLastUpdated(new Date())
       setError(null)
+      matchesRef.current = matchesRes.matches
+      lastFetchAtRef.current = Date.now()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load data')
     }
@@ -30,7 +38,11 @@ export default function App() {
 
   useEffect(() => {
     load()
-    const id = setInterval(load, REFRESH_MS)
+    const id = setInterval(() => {
+      if (shouldPollNow(matchesRef.current, lastFetchAtRef.current, new Date())) {
+        load()
+      }
+    }, TICK_MS)
     return () => clearInterval(id)
   }, [load])
 
