@@ -30,7 +30,7 @@ export default function App() {
   }, [load])
 
   return (
-    <div className="min-h-screen bg-neutral-950 px-4 py-10 text-neutral-100">
+    <div className="min-h-screen bg-neutral-800 px-4 py-10 text-neutral-100">
       <div className="mx-auto max-w-6xl">
         <header className="mb-8 flex flex-col items-center gap-2 text-center">
           <h1 className="text-3xl font-bold sm:text-4xl">Premier League Tracker</h1>

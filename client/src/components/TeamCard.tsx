@@ -42,7 +42,7 @@ export function TeamCard({ data }: { data: TeamData }) {
           )}
           <div>
             <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">
-              {config.owner}'s team
+              {config.owner}
             </p>
             <h2 className="text-lg font-semibold text-neutral-50">{config.displayName}</h2>
           </div>
@@ -62,10 +62,10 @@ export function TeamCard({ data }: { data: TeamData }) {
 
       {standing && (
         <div className="grid grid-cols-4 gap-2 text-center text-sm">
-          <Stat label="P" value={standing.playedGames} />
-          <Stat label="W" value={standing.won} />
-          <Stat label="D" value={standing.draw} />
-          <Stat label="L" value={standing.lost} />
+          <Stat label="P" title="Played" value={standing.playedGames} />
+          <Stat label="W" title="Won" value={standing.won} />
+          <Stat label="D" title="Drawn" value={standing.draw} />
+          <Stat label="L" title="Lost" value={standing.lost} />
         </div>
       )}
 
@@ -126,9 +126,9 @@ function MatchLine({ match, config }: { match: TeamData['nextMatch']; config: Te
   )
 }
 
-function Stat({ label, value }: { label: string; value: number }) {
+function Stat({ label, title, value }: { label: string; title: string; value: number }) {
   return (
-    <div className="rounded-lg bg-neutral-950/50 py-2">
+    <div className="rounded-lg bg-neutral-950/50 py-2" title={title}>
       <p className="text-base font-semibold text-neutral-100">{value}</p>
       <p className="text-[10px] uppercase tracking-wide text-neutral-500">{label}</p>
     </div>
