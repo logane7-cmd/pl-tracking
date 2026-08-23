@@ -2,13 +2,13 @@ import type { TeamData } from '../lib/derive'
 import { formatKickoff, opponentOf, resultFor, scoreLine } from '../lib/format'
 
 const RESULT_STYLES: Record<'W' | 'D' | 'L', string> = {
-  W: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
-  D: 'bg-slate-500/15 text-slate-300 border-slate-500/30',
-  L: 'bg-rose-500/15 text-rose-400 border-rose-500/30',
+  W: 'bg-emerald-500/15 text-emerald-500 border-emerald-500/30',
+  D: 'bg-slate-500/15 text-slate-500 border-slate-500/30',
+  L: 'bg-rose-500/15 text-rose-500 border-rose-500/30',
 }
 
 function FormBadges({ form }: { form: string | null }) {
-  if (!form) return <p className="text-sm text-neutral-500">No results yet this season</p>
+  if (!form) return <p className="text-sm text-whistle">No results yet this season</p>
   const results = form
     .split(',')
     .map((s) => s.trim().toUpperCase())
@@ -27,12 +27,18 @@ function FormBadges({ form }: { form: string | null }) {
   )
 }
 
+function haloClass(position: number): string {
+  if (position <= 4) return 'ring-2 ring-gold/50 ring-offset-2 ring-offset-turf'
+  if (position >= 18) return 'ring-2 ring-rose-500/50 ring-offset-2 ring-offset-turf'
+  return ''
+}
+
 export function TeamCard({ data }: { data: TeamData }) {
   const { config, standing, liveMatch, lastMatch, nextMatch } = data
 
   return (
     <div
-      className="flex flex-col gap-5 rounded-2xl border border-neutral-800 bg-neutral-900/60 p-6 shadow-lg"
+      className="flex flex-col gap-5 rounded-2xl border border-pitch-line bg-turf p-6 shadow-lg transition-[transform,box-shadow] duration-150 hover:-translate-y-1 hover:shadow-xl motion-reduce:transition-none motion-reduce:hover:translate-y-0"
       style={{ borderTopColor: config.color, borderTopWidth: 4 }}
     >
       <div className="flex items-center justify-between gap-3">
@@ -41,21 +47,23 @@ export function TeamCard({ data }: { data: TeamData }) {
             <img src={standing.team.crest} alt="" className="h-12 w-12 object-contain" />
           )}
           <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">
+            <p className="text-[11px] font-medium uppercase tracking-wide text-whistle">
               {config.owner}
             </p>
-            <h2 className="text-lg font-semibold text-neutral-50">{config.displayName}</h2>
+            <h2 className="text-lg font-semibold text-chalk">{config.displayName}</h2>
           </div>
         </div>
         {standing && (
           <div className="text-right">
-            <p className="text-3xl font-bold leading-none text-neutral-50">
+            <p
+              className={`inline-flex items-baseline gap-0.5 rounded-full px-2 py-0.5 text-3xl font-bold leading-none tabular-nums text-chalk ${haloClass(standing.position)}`}
+            >
               {standing.position}
-              <span className="text-sm font-medium text-neutral-500">
+              <span className="text-sm font-medium text-whistle">
                 {ordinalSuffix(standing.position)}
               </span>
             </p>
-            <p className="text-xs text-neutral-500">{standing.points} pts</p>
+            <p className="text-xs tabular-nums text-whistle">{standing.points} pts</p>
           </div>
         )}
       </div>
@@ -70,14 +78,14 @@ export function TeamCard({ data }: { data: TeamData }) {
       )}
 
       <div>
-        <p className="mb-2 text-xs font-medium uppercase tracking-wide text-neutral-500">Form</p>
+        <p className="mb-2 text-[11px] font-medium uppercase tracking-wide text-whistle">Form</p>
         <FormBadges form={standing?.form ?? null} />
       </div>
 
       {liveMatch && (
         <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-4">
-          <p className="mb-1 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-amber-400">
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-400" />
+          <p className="mb-1 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-amber-500">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-500" />
             Live now
           </p>
           <MatchLine match={liveMatch} config={config} />
@@ -85,8 +93,8 @@ export function TeamCard({ data }: { data: TeamData }) {
       )}
 
       {!liveMatch && nextMatch && (
-        <div className="rounded-xl border border-neutral-800 bg-neutral-950/50 p-4">
-          <p className="mb-1 text-xs font-medium uppercase tracking-wide text-neutral-500">
+        <div className="rounded-xl border border-pitch-line bg-pitch p-4">
+          <p className="mb-1 text-[11px] font-medium uppercase tracking-wide text-whistle">
             Next match &middot; {formatKickoff(nextMatch.utcDate)}
           </p>
           <MatchLine match={nextMatch} config={config} />
@@ -94,8 +102,8 @@ export function TeamCard({ data }: { data: TeamData }) {
       )}
 
       {lastMatch && (
-        <div className="rounded-xl border border-neutral-800 p-4">
-          <p className="mb-1 flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-neutral-500">
+        <div className="rounded-xl border border-pitch-line p-4">
+          <p className="mb-1 flex items-center gap-2 text-[11px] font-medium uppercase tracking-wide text-whistle">
             Last result
             {resultFor(config, lastMatch) && (
               <span
@@ -117,20 +125,20 @@ function MatchLine({ match, config }: { match: TeamData['nextMatch']; config: Te
   const { isHome, opponent } = opponentOf(config, match)
   const hasScore = match.score.fullTime.home !== null
   return (
-    <div className="flex items-center gap-2 text-sm text-neutral-200">
-      <span className="text-neutral-500">{isHome ? 'vs' : '@'}</span>
+    <div className="flex items-center gap-2 text-sm text-chalk">
+      <span className="text-whistle">{isHome ? 'vs' : '@'}</span>
       <img src={opponent.crest} alt="" className="h-5 w-5 object-contain" />
       <span>{opponent.shortName || opponent.name}</span>
-      {hasScore && <span className="ml-auto font-semibold">{scoreLine(match)}</span>}
+      {hasScore && <span className="ml-auto font-semibold tabular-nums">{scoreLine(match)}</span>}
     </div>
   )
 }
 
 function Stat({ label, title, value }: { label: string; title: string; value: number }) {
   return (
-    <div className="rounded-lg bg-neutral-950/50 py-2" title={title}>
-      <p className="text-base font-semibold text-neutral-100">{value}</p>
-      <p className="text-[10px] uppercase tracking-wide text-neutral-500">{label}</p>
+    <div className="rounded-lg bg-pitch py-2" title={title}>
+      <p className="text-base font-semibold tabular-nums text-chalk">{value}</p>
+      <p className="text-[11px] uppercase tracking-wide text-whistle">{label}</p>
     </div>
   )
 }

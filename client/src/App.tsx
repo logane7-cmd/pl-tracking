@@ -3,6 +3,7 @@ import { TEAMS } from './config/teams'
 import { fetchMatches, fetchStandings } from './lib/api'
 import { deriveTeamData, type TeamData } from './lib/derive'
 import { TeamCard } from './components/TeamCard'
+import { ThemeToggle } from './components/ThemeToggle'
 
 const REFRESH_MS = 60_000
 
@@ -30,26 +31,29 @@ export default function App() {
   }, [load])
 
   return (
-    <div className="min-h-screen bg-neutral-800 px-4 py-10 text-neutral-100">
+    <div className="min-h-screen bg-pitch px-4 py-10 text-chalk">
       <div className="mx-auto max-w-6xl">
         <header className="mb-8 flex flex-col items-center gap-2 text-center">
           <h1 className="text-3xl font-bold sm:text-4xl">Premier League Tracker</h1>
-          <p className="text-neutral-400">Four rivals, four tables of trash talk.</p>
-          {lastUpdated && (
-            <p className="text-xs text-neutral-600">
-              Updated {lastUpdated.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
-            </p>
-          )}
+          <p className="text-whistle">Four rivals, four tables of trash talk.</p>
+          <div className="flex items-center gap-3">
+            {lastUpdated && (
+              <p className="text-xs text-whistle">
+                Updated {lastUpdated.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
+              </p>
+            )}
+            <ThemeToggle />
+          </div>
         </header>
 
         {error && (
-          <p className="mb-6 rounded-lg border border-rose-500/30 bg-rose-500/10 p-4 text-center text-sm text-rose-300">
+          <p className="mb-6 rounded-lg border border-rose-500/30 bg-rose-500/10 p-4 text-center text-sm text-rose-400">
             {error}
           </p>
         )}
 
         {!teamData && !error && (
-          <p className="text-center text-neutral-500">Loading standings...</p>
+          <p className="text-center text-whistle">Loading standings...</p>
         )}
 
         {teamData && (

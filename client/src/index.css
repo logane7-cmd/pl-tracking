@@ -1,9 +1,38 @@
 @import 'tailwindcss';
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
+  --pitch: #f7f5ef;
+  --turf: #ffffff;
+  --chalk: #1c1e24;
+  --whistle: #6b6f7b;
+  --gold: #c97f1b;
+  --pitch-line: rgba(20, 20, 20, 0.08);
+  color-scheme: light;
+}
+
+.dark {
+  --pitch: #15171d;
+  --turf: #1e212a;
+  --chalk: #f4f3ef;
+  --whistle: #9297a8;
+  --gold: #e8a33d;
+  --pitch-line: rgba(255, 255, 255, 0.08);
   color-scheme: dark;
+}
+
+@theme inline {
+  --color-pitch: var(--pitch);
+  --color-turf: var(--turf);
+  --color-chalk: var(--chalk);
+  --color-whistle: var(--whistle);
+  --color-gold: var(--gold);
+  --color-pitch-line: var(--pitch-line);
 }
 
 body {
   margin: 0;
+  background-color: var(--pitch);
+  color: var(--chalk);
 }
