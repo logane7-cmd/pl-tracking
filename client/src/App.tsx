@@ -3,12 +3,15 @@ import { TEAMS } from './config/teams'
 import { fetchMatches, fetchStandings } from './lib/api'
 import { deriveTeamData, type TeamData } from './lib/derive'
 import { TeamCard } from './components/TeamCard'
+import { StandingsTable } from './components/StandingsTable'
 import { ThemeToggle } from './components/ThemeToggle'
+import type { StandingsRow } from './types'
 
 const REFRESH_MS = 60_000
 
 export default function App() {
   const [teamData, setTeamData] = useState<TeamData[] | null>(null)
+  const [standingsTable, setStandingsTable] = useState<StandingsRow[] | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
 
@@ -17,6 +20,7 @@ export default function App() {
       const [standingsRes, matchesRes] = await Promise.all([fetchStandings(), fetchMatches()])
       const table = standingsRes.standings.find((s) => s.type === 'TOTAL')?.table ?? []
       setTeamData(deriveTeamData(TEAMS, table, matchesRes.matches))
+      setStandingsTable(table)
       setLastUpdated(new Date())
       setError(null)
     } catch (err) {
@@ -63,6 +67,8 @@ export default function App() {
             ))}
           </div>
         )}
+
+        {standingsTable && <StandingsTable table={standingsTable} />}
       </div>
     </div>
   )
