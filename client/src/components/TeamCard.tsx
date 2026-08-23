@@ -27,12 +27,6 @@ function FormBadges({ form }: { form: string | null }) {
   )
 }
 
-function haloClass(position: number): string {
-  if (position <= 4) return 'ring-2 ring-gold/50 ring-offset-2 ring-offset-turf'
-  if (position >= 18) return 'ring-2 ring-rose-500/50 ring-offset-2 ring-offset-turf'
-  return ''
-}
-
 export function TeamCard({ data }: { data: TeamData }) {
   const { config, standing, liveMatch, lastMatch, nextMatch } = data
 
@@ -41,7 +35,7 @@ export function TeamCard({ data }: { data: TeamData }) {
       className="flex flex-col gap-5 rounded-2xl border border-pitch-line bg-turf p-6 shadow-lg transition-[transform,box-shadow] duration-150 hover:-translate-y-1 hover:shadow-xl motion-reduce:transition-none motion-reduce:hover:translate-y-0"
       style={{ borderTopColor: config.color, borderTopWidth: 4 }}
     >
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex items-center justify-between gap-6">
         <div className="flex items-center gap-3">
           {standing && (
             <img src={standing.team.crest} alt="" className="h-12 w-12 object-contain" />
@@ -55,9 +49,7 @@ export function TeamCard({ data }: { data: TeamData }) {
         </div>
         {standing && (
           <div className="text-right">
-            <p
-              className={`inline-flex items-baseline gap-0.5 rounded-full px-2 py-0.5 text-3xl font-bold leading-none tabular-nums text-chalk ${haloClass(standing.position)}`}
-            >
+            <p className="inline-flex items-baseline gap-0.5 text-3xl font-bold leading-none tabular-nums text-chalk">
               {standing.position}
               <span className="text-sm font-medium text-whistle">
                 {ordinalSuffix(standing.position)}
