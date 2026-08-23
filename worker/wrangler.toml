@@ -4,7 +4,7 @@ compatibility_date = "2026-08-01"
 
 [vars]
 # The GitHub Pages origin allowed to call this worker. No trailing slash.
-ALLOWED_ORIGIN = "https://your-github-username.github.io"
+ALLOWED_ORIGIN = "https://logane7-cmd.github.io"
 
 # FOOTBALL_DATA_API_KEY is a secret, not a var — set it with:
 #   npx wrangler secret put FOOTBALL_DATA_API_KEY

@@ -8,3 +8,5 @@ dist/
 .DS_Store
 SETUP_PROGRESS.md
 INFRA_HANDOFF.md
+BACKLOG.md
+backlog/
