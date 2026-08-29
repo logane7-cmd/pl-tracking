@@ -1,5 +1,5 @@
 import type { TeamData } from '../lib/derive'
-import { formatKickoff, opponentOf, resultFor, scoreLine } from '../lib/format'
+import { formatKickoff, formatUpdatedTime, opponentOf, resultFor, scoreLine } from '../lib/format'
 
 const RESULT_STYLES: Record<'W' | 'D' | 'L', string> = {
   W: 'bg-emerald-500/15 text-emerald-500 border-emerald-500/30',
@@ -81,6 +81,9 @@ export function TeamCard({ data }: { data: TeamData }) {
             Live now
           </p>
           <MatchLine match={liveMatch} config={config} />
+          <p className="mt-1.5 text-[11px] text-whistle">
+            Score data as of {formatUpdatedTime(liveMatch.lastUpdated)}
+          </p>
         </div>
       )}
 

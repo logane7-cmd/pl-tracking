@@ -51,3 +51,7 @@ export function scoreLine(match: ApiMatch): string {
   if (home === null || away === null) return 'vs'
   return `${home} - ${away}`
 }
+
+export function formatUpdatedTime(isoDate: string): string {
+  return new Date(isoDate).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })
+}

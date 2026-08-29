@@ -45,6 +45,7 @@ export interface ApiMatch {
   utcDate: string
   status: MatchStatus
   matchday: number | null
+  lastUpdated: string
   homeTeam: ApiTeam
   awayTeam: ApiTeam
   score: {
