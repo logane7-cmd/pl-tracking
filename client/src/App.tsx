@@ -25,7 +25,7 @@ export default function App() {
     try {
       const [standingsRes, matchesRes] = await Promise.all([fetchStandings(), fetchMatches()])
       const table = standingsRes.standings.find((s) => s.type === 'TOTAL')?.table ?? []
-      setTeamData(deriveTeamData(TEAMS, table, matchesRes.matches))
+      setTeamData(deriveTeamData(TEAMS, table, matchesRes.matches, Date.now()))
       setStandingsTable(table)
       setLastUpdated(new Date())
       setError(null)

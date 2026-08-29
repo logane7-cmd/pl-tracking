@@ -6,16 +6,30 @@ export interface TeamData {
   standing: StandingsRow | null
   liveMatch: ApiMatch | null
   lastMatch: ApiMatch | null
+  lastMatchProvisional: boolean
   nextMatch: ApiMatch | null
 }
 
 const LIVE_STATUSES = new Set(['IN_PLAY', 'PAUSED'])
 const UPCOMING_STATUSES = new Set(['SCHEDULED', 'TIMED'])
 
+// football-data.org has been observed marking a match FINISHED with a score
+// it then silently corrects a few minutes later (BL-0011). Treat a freshly
+// finished match's score as unconfirmed until it's gone this long without a
+// further update from the API.
+export const FINAL_SCORE_GRACE_MS = 15 * 60_000
+
+export function isFinalScoreProvisional(match: ApiMatch, nowMs: number): boolean {
+  if (match.status !== 'FINISHED') return false
+  const updatedMs = new Date(match.lastUpdated).getTime()
+  return nowMs - updatedMs < FINAL_SCORE_GRACE_MS
+}
+
 export function deriveTeamData(
   configs: TeamConfig[],
   table: StandingsRow[],
   matches: ApiMatch[],
+  nowMs: number = Date.now(),
 ): TeamData[] {
   return configs.map((config) => {
     const standing = table.find((row) => matchesTeam(config, row.team)) ?? null
@@ -29,10 +43,12 @@ export function deriveTeamData(
     const lastMatch =
       [...teamMatches].reverse().find((m) => m.status === 'FINISHED') ?? null
 
+    const lastMatchProvisional = lastMatch ? isFinalScoreProvisional(lastMatch, nowMs) : false
+
     const nextMatch =
       teamMatches.find((m) => UPCOMING_STATUSES.has(m.status)) ?? null
 
-    return { config, standing, liveMatch, lastMatch, nextMatch }
+    return { config, standing, liveMatch, lastMatch, lastMatchProvisional, nextMatch }
   }).sort((a, b) => {
     if (a.standing === null && b.standing === null) return 0
     if (a.standing === null) return 1

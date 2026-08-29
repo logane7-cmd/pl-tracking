@@ -28,7 +28,7 @@ function FormBadges({ form }: { form: string | null }) {
 }
 
 export function TeamCard({ data }: { data: TeamData }) {
-  const { config, standing, liveMatch, lastMatch, nextMatch } = data
+  const { config, standing, liveMatch, lastMatch, lastMatchProvisional, nextMatch } = data
 
   return (
     <div
@@ -80,9 +80,9 @@ export function TeamCard({ data }: { data: TeamData }) {
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-500" />
             Live now
           </p>
-          <MatchLine match={liveMatch} config={config} />
+          <MatchLine match={liveMatch} config={config} hideScore />
           <p className="mt-1.5 text-[11px] text-whistle">
-            Score data as of {formatUpdatedTime(liveMatch.lastUpdated)}
+            Status as of {formatUpdatedTime(liveMatch.lastUpdated)}
           </p>
         </div>
       )}
@@ -99,8 +99,8 @@ export function TeamCard({ data }: { data: TeamData }) {
       {lastMatch && (
         <div className="rounded-xl border border-pitch-line p-4">
           <p className="mb-1 flex items-center gap-2 text-[11px] font-medium uppercase tracking-wide text-whistle">
-            Last result
-            {resultFor(config, lastMatch) && (
+            {lastMatchProvisional ? 'Full-time' : 'Last result'}
+            {!lastMatchProvisional && resultFor(config, lastMatch) && (
               <span
                 className={`rounded border px-1.5 py-0.5 text-[10px] font-semibold ${RESULT_STYLES[resultFor(config, lastMatch)!]}`}
               >
@@ -108,7 +108,12 @@ export function TeamCard({ data }: { data: TeamData }) {
               </span>
             )}
           </p>
-          <MatchLine match={lastMatch} config={config} />
+          <MatchLine match={lastMatch} config={config} hideScore={lastMatchProvisional} />
+          {lastMatchProvisional && (
+            <p className="mt-1.5 text-[11px] text-whistle">
+              Confirming final score as of {formatUpdatedTime(lastMatch.lastUpdated)}
+            </p>
+          )}
         </div>
       )}
     </div>
@@ -125,10 +130,18 @@ function KickoffLabel({ utcDate }: { utcDate: string }) {
   )
 }
 
-function MatchLine({ match, config }: { match: TeamData['nextMatch']; config: TeamData['config'] }) {
+function MatchLine({
+  match,
+  config,
+  hideScore,
+}: {
+  match: TeamData['nextMatch']
+  config: TeamData['config']
+  hideScore?: boolean
+}) {
   if (!match) return null
   const { isHome, opponent } = opponentOf(config, match)
-  const hasScore = match.score.fullTime.home !== null
+  const hasScore = !hideScore && match.score.fullTime.home !== null
   return (
     <div className="flex items-center gap-2 text-sm text-chalk">
       <span className="text-whistle">{isHome ? 'vs' : '@'}</span>

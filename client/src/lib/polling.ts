@@ -1,4 +1,5 @@
 import type { ApiMatch } from '../types'
+import { isFinalScoreProvisional } from './derive'
 
 export const LIVE_POLL_MS = 60_000
 export const IDLE_POLL_MS = 15 * 60_000
@@ -22,6 +23,9 @@ export function isMatchLikelyActive(match: ApiMatch, nowMs: number): boolean {
     const hoursSinceKickoff = (nowMs - kickoffMs) / 3_600_000
     return minsToKickoff <= 5 && hoursSinceKickoff <= 3
   }
+  // Keep polling at the live cadence while a final score is still
+  // unconfirmed (BL-0011), so we catch an upstream correction quickly.
+  if (isFinalScoreProvisional(match, nowMs)) return true
   return false
 }
 
