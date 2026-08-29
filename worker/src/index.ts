@@ -81,6 +81,7 @@ export default {
       headers: {
         'Content-Type': 'application/json',
         'Cache-Control': 'public, max-age=30',
+        'X-Fetched-At': new Date().toISOString(),
         ...headers,
       },
     })
